@@ -1,97 +1,50 @@
-# Spring Boot H2 Database CRUD example: Building Rest API with Spring Data JPA
+Introduction:
 
-For more detail, please visit:
-> [Spring Boot JPA + H2 example: Build a CRUD Rest APIs](https://www.bezkoder.com/spring-boot-jpa-h2-example/)
+Hibernate’s dirty checking mechanism is a cornerstone for persistence operations, ensuring only modified entities are updated in the database. However, the default behaviour might not always align perfectly with your domain model. This blog post introduces a custom @IgnoreDirtyProperty annotation to selectively exclude properties from dirty checking, enhancing efficiency and flexibility.
 
-In this tutorial, we're gonna build a Spring Boot Rest CRUD API example with Maven that use Spring Data JPA to interact with H2 database. You'll know:
+Understanding Dirty Checking:
 
-- How to configure Spring Data, JPA, Hibernate to work with Database
-- How to define Data Models and Repository interfaces
-- Way to create Spring Rest Controller to process HTTP requests
-- Way to use Spring Data JPA to interact with H2 Database
+When an entity is retrieved from the database and later persisted, Hibernate compares its current state with the original state. Properties with changes are flagged as “dirty,” and only those dirty properties are written to the database during the update operation. This approach optimizes database interactions but can become cumbersome in specific scenarios.
 
-Front-end that works well with this Back-end
-> [Angular 8](https://www.bezkoder.com/angular-crud-app/) / [Angular 10](https://www.bezkoder.com/angular-10-crud-app/) / [Angular 11](https://www.bezkoder.com/angular-11-crud-app/) / [Angular 12](https://www.bezkoder.com/angular-12-crud-app/) / [Angular 13](https://www.bezkoder.com/angular-13-crud-example/) / [Angular 14](https://www.bezkoder.com/angular-14-crud-example/) / [Angular 15](https://www.bezkoder.com/angular-15-crud-example/) / [Angular 16](https://www.bezkoder.com/angular-16-crud-example/) / [Angular 17 Client](https://www.bezkoder.com/angular-17-crud-example/)
+Challenges with Default Dirty Checking:
 
-> [Vue 2 Client](https://www.bezkoder.com/vue-js-crud-app/) / [Vue 3 Client](https://www.bezkoder.com/vue-3-crud/) / [Vuetify Client](https://www.bezkoder.com/vuetify-data-table-example/)
+Transient Properties: Some properties might be used temporarily within your application logic but don’t require persistence. Including them in dirty checking can lead to unnecessary overhead.
+Calculated Fields: Properties derived from other properties don’t necessarily need to be tracked for changes.
+Versioning Fields: Versioning columns often get incremented automatically and shouldn’t trigger updates.
+Introducing @IgnoreDirtyProperty:
 
-> [React Client](https://www.bezkoder.com/react-hooks-crud-axios-api/) / [React Redux Client](https://www.bezkoder.com/redux-toolkit-crud-react-hooks/)
+To address these challenges, we can create a custom annotation:
 
-More Practice:
-> [Spring Boot Validate Request Body](https://www.bezkoder.com/spring-boot-validate-request-body/)
+Java
 
-> [Spring Boot File upload example with Multipart File](https://www.bezkoder.com/spring-boot-file-upload/)
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface IgnoreDirtyProperty {
+}
+Use code https://github.com/SwamyKallem/SpringBoot-H2-JPA-CustomDirtyCheck
 
-> [Spring Boot Pagination & Filter example | Spring JPA, Pageable](https://www.bezkoder.com/spring-boot-pagination-filter-jpa-pageable/)
 
-> [Spring Data JPA Sort/Order by multiple Columns | Spring Boot](https://www.bezkoder.com/spring-data-sort-multiple-columns/)
+This annotation can be applied to entity properties to signal Hibernate to exclude them from dirty checking.
 
-> [Spring Boot Repository Unit Test with @DataJpaTest](https://www.bezkoder.com/spring-boot-unit-test-jpa-repo-datajpatest/)
+Implementation:
 
-> [Spring Boot Rest Controller Unit Test with @WebMvcTest](https://www.bezkoder.com/spring-boot-webmvctest/)
+Here’s how to leverage the @IgnoreDirtyProperty annotation:
 
-> Cache the result: [Spring Boot Redis Cache example](https://www.bezkoder.com/spring-boot-redis-cache-example/)
+Java
 
-> Documentation: [Spring Boot with Swagger 3 example](https://www.bezkoder.com/spring-boot-swagger-3/)
+public class MyEntity {
+ @Id
+  private Long id;
+private String name;
+  @IgnoreDirtyProperty
+  private String tempData;
+  // Getters and setters omitted for brevity
+}
 
-> Reactive Rest API: [Spring Boot WebFlux example](https://www.bezkoder.com/spring-boot-webflux-rest-api/)
+In this example, the tempData property is marked with @IgnoreDirtyProperty. Any changes to tempData won't be considered during the update process.
 
-> [Deploy Spring Boot App on AWS – Elastic Beanstalk](https://www.bezkoder.com/deploy-spring-boot-aws-eb/)
+Benefits of Custom Dirty Checking:
 
-Exception Handling:
-> [Spring Boot @ControllerAdvice & @ExceptionHandler example](https://www.bezkoder.com/spring-boot-controlleradvice-exceptionhandler/)
-
-> [@RestControllerAdvice example in Spring Boot](https://www.bezkoder.com/spring-boot-restcontrolleradvice/)
-
-Associations:
-> [Spring Boot One To One example with Spring JPA, Hibernate](https://www.bezkoder.com/jpa-one-to-one/)
-
-> [Spring Boot One To Many example with Spring JPA, Hibernate](https://www.bezkoder.com/jpa-one-to-many/)
-
-> [Spring Boot Many To Many example with Spring JPA, Hibernate](https://www.bezkoder.com/jpa-many-to-many/)
-
-Other databases:
-> [Spring Boot JPA + MySQL: CRUD Rest API example](https://www.bezkoder.com/spring-boot-jpa-crud-rest-api/)
-
-> [Spring Boot JPA + PostgreSQL: CRUD Rest API example](https://www.bezkoder.com/spring-boot-postgresql-example/)
-
-Security:
-> [Spring Boot + Spring Security JWT Authentication & Authorization](https://www.bezkoder.com/spring-boot-jwt-authentication/)
-
-Fullstack:
-> [Vue + Spring Boot example](https://www.bezkoder.com/spring-boot-vue-js-crud-example/)
-
-> [Angular 8 + Spring Boot example](https://www.bezkoder.com/angular-spring-boot-crud/)
-
-> [Angular 10 + Spring Boot example](https://www.bezkoder.com/angular-10-spring-boot-crud/)
-
-> [Angular 11 + Spring Boot example](https://www.bezkoder.com/angular-11-spring-boot-crud/)
-
-> [Angular 12 + Spring Boot example](https://www.bezkoder.com/angular-12-spring-boot-crud/)
-
-> [Angular 13 + Spring Boot example](https://www.bezkoder.com/spring-boot-angular-13-crud/)
-
-> [Angular 14 + Spring Boot example](https://www.bezkoder.com/spring-boot-angular-14-crud/)
-
-> [Angular 15 + Spring Boot example](https://www.bezkoder.com/spring-boot-angular-15-crud/)
-
-> [Angular 16 + Spring Boot example](https://www.bezkoder.com/spring-boot-angular-16-crud/)
-
-> [Angular 17 + Spring Boot example](https://www.bezkoder.com/spring-boot-angular-17-crud/)
-
-> [React + Spring Boot + MySQL example](https://www.bezkoder.com/react-spring-boot-crud/)
-
-> [React + Spring Boot + PostgreSQL example](https://www.bezkoder.com/spring-boot-react-postgresql/)
-
-Run both Back-end & Front-end in one place:
-> [Integrate Angular with Spring Boot Rest API](https://www.bezkoder.com/integrate-angular-spring-boot/)
-
-> [Integrate React.js with Spring Boot Rest API](https://www.bezkoder.com/integrate-reactjs-spring-boot/)
-
-> [Integrate Vue.js with Spring Boot Rest API](https://www.bezkoder.com/integrate-vue-spring-boot/)
-
-## Run Spring Boot application
-```
-mvn spring-boot:run
-```
-
+Improved Performance: By excluding unnecessary properties, you can potentially reduce the number of database writes and enhance application responsiveness.
+Cleaner Code: The annotation provides a clear and concise way to manage dirty checking behavior within your domain model.
+Flexibility: You can tailor dirty checking to your specific data model requirements.
